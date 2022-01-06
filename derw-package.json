@@ -1,0 +1,8 @@
+{
+    "name": "wordle",
+    "exposing": [],
+    "dependencies": {
+        "derw-lang/html": "master",
+        "derw-lang/stdlib": "master"
+    }
+}

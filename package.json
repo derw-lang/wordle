@@ -1,0 +1,26 @@
+{
+  "name": "wordle",
+  "version": "1.0.0",
+  "description": "An implementation of Wordle in Derw",
+  "scripts": {
+    "build": "npx derw compile && npx parcel build index.html",
+    "compile": "npx derw compile",
+    "parcel": "npx parcel index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/derw-lang/wordle.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/derw-lang/wordle/issues"
+  },
+  "homepage": "https://github.com/derw-lang/wordle#readme",
+  "devDependencies": {
+    "derw": "^0.0.3-11",
+    "parcel": "^2.1.0"
+  }
+}

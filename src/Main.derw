@@ -1,0 +1,129 @@
+import "../derw-packages/derw-lang/html/src/Html" exposing (RunningProgram, HtmlNode, program, div, text, class_, input, attribute, button, onInput, onClick, a)
+import "../derw-packages/derw-lang/stdlib/src/List" as List
+import "../derw-packages/derw-lang/stdlib/src/String" exposing (split)
+
+
+type alias Model = {
+    currentGuess: string,
+    word: string,
+    guesses: List string
+}
+
+type Msg = Noop
+    | ChangeGuess { value: string }
+    | SubmitGuess
+
+isInWordHelper: string -> string -> boolean -> boolean
+isInWordHelper guessedLetter wordLetter hasBeenSeen =
+    if hasBeenSeen then
+        hasBeenSeen
+    else
+        wordLetter == guessedLetter
+
+isInWord: string -> string -> boolean
+isInWord char word =
+    split "" word
+        |> List.foldl (\x y -> isInWordHelper char x y) false
+
+viewInTile: HtmlNode Msg -> HtmlNode Msg
+viewInTile inner =
+    div [] [ class_ "tile" ] [ inner ]
+
+viewLetter: string -> string -> string -> HtmlNode Msg
+viewLetter correctLetter guessedLetter wholeWord =
+    let
+        isInWholeWord: boolean
+        isInWholeWord =
+            isInWord guessedLetter wholeWord
+
+    in
+        if correctLetter == guessedLetter then
+            viewInTile (div [] [ class_ "correct-letter", class_ "letter" ] [ text guessedLetter ])
+        else
+            if isInWholeWord then
+                viewInTile (div [] [ class_ "incorrectly-placed-letter", class_ "letter" ] [ text guessedLetter ])
+            else
+                viewInTile (div [] [ class_ "incorrect-letter", class_ "letter" ] [ text guessedLetter ])
+
+
+viewRow: string -> string -> HtmlNode Msg
+viewRow word guess =
+    List.map (\i -> viewLetter word[i] guess[i] word) [0..4]
+        |> div [] [ class_ "row" ]
+
+viewEmptyLetter: HtmlNode Msg
+viewEmptyLetter =
+    viewInTile (div [ ] [ class_ "letter", class_ "empty-letter" ] [])
+
+viewEmptyRow: HtmlNode Msg
+viewEmptyRow =
+    List.map (\_ -> viewEmptyLetter) [0..4]
+        |> div [] [ class_ "row" ]
+
+viewGuessInput: string -> HtmlNode Msg
+viewGuessInput word = input
+    [ onInput (\word -> ChangeGuess { value: word })]
+    [ attribute "value" word, attribute "type" "text" ]
+
+viewSubmit: string -> HtmlNode Msg
+viewSubmit currentGuess =
+    if currentGuess.length < 5 then
+        text ""
+    else
+        button [ onClick (\_ -> SubmitGuess)] [ class_ "submit" ] [ text "Submit guess" ]
+
+viewGame: Model -> HtmlNode Msg
+viewGame model =
+    let
+        rows: List (HtmlNode Msg)
+        rows =
+            List.map (\guess -> viewRow model.word guess) model.guesses
+
+        remainingRowsToMake: number
+        remainingRowsToMake =
+            5 - model.guesses.length
+
+        emptyRows: List (HtmlNode Msg)
+        emptyRows =
+            List.map (\_ -> viewEmptyRow) [1..remainingRowsToMake]
+
+        joinedRows: List (HtmlNode Msg)
+        joinedRows =
+            List.append rows emptyRows
+    in
+        div
+            []
+            [ class_ "game" ]
+            [ a [] [ attribute "href" "https://www.powerlanguage.co.uk/wordle/"] [ text "Wordle, but in Derw"]
+            , a [] [ attribute "href" "https://github.com/derw-lang/wordle"] [ text "Click here to check out the source" ]
+            , text "We have hidden a 5 letter word below"
+            , div [] [ class_ "board"] joinedRows
+            , div [] [ class_ "guess-input" ] [ text "Enter your guess:", viewGuessInput model.currentGuess, viewSubmit model.currentGuess ]
+            ]
+
+view: Model -> HtmlNode Msg
+view model =
+    div [] [] [ viewGame model ]
+
+update: Msg -> Model -> Model
+update msg model =
+    case msg of
+        Noop -> model
+        ChangeGuess { value } -> { word: model.word, guesses: model.guesses, currentGuess: value }
+        SubmitGuess ->
+            { word: model.word
+            , guesses: List.append model.guesses [ model.currentGuess ]
+            , currentGuess: ""
+            }
+
+initialModel: Model
+initialModel =
+    { word: "hello", guesses: [], currentGuess: "" }
+
+root: any
+root =
+    document.getElementById "root"
+
+main: RunningProgram Model Msg
+main =
+    program { initialModel: initialModel, view: view, update: update, root: root }
