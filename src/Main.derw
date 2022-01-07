@@ -61,9 +61,10 @@ viewEmptyRow =
         |> div [] [ class_ "row" ]
 
 viewGuessInput: string -> HtmlNode Msg
-viewGuessInput word = input
-    [ onInput (\word -> ChangeGuess { value: word })]
-    [ attribute "value" word, attribute "type" "text" ]
+viewGuessInput word =
+    input
+        [ onInput (\word -> ChangeGuess { value: word })]
+        [ attribute "value" word, attribute "type" "text" ]
 
 viewSubmit: string -> HtmlNode Msg
 viewSubmit currentGuess =

@@ -34,7 +34,6 @@ a:last-of-type {
 .guess-input {
     display: flex;
     flex-direction: column;
-    color: black;
 }
 
 input[type="text"] {
